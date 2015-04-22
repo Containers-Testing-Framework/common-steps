@@ -8,14 +8,14 @@ import subprocess
 
 
 @step(u'port {port:d} is open')
-@step(u'port {port:d} is {negative} open')
+@step(u'port {port:d} is {negative:w} open')
 def port_open(context, port, negative=False):
     # Get container IP
     context.ip = context.run("docker inspect --format='{{.NetworkSettings.IPAddress}}' %s" % context.cid).strip()
 
     for attempts in xrange(0, 5):
         try:
-            print(run('nc -w5 %s %s < /dev/null' % (context.ip, port)))
+            run('nc -w5 %s %s < /dev/null' % (context.ip, port))
             return
         except subprocess.CalledProcessError:
             # If  negative part was set, then we expect a bad code
