@@ -3,22 +3,22 @@
 # Some useful functions for your environment.py
 import subprocess
 import os
+import logging
 
 
-def run(command, print_output=True):
+def run(command):
     """Run a command locally, print output and throw exception if exit code is not 0"""
     try:
-        print("Running '%s'" % command)
+        logging.info("Running '%s'" % command)
         output = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
-        if print_output:
-            print("Return code: 0, output:\n%s" % output)
+        logging.debug("Return code: 0, output:\n%s" % output)
         return output
     except subprocess.CalledProcessError as e:
-        print("Return code: %d, output:\n%s" % (e.returncode, e.output))
+        logging.warn("Return code: %d, output:\n%s" % (e.returncode, e.output))
         raise e
 
 
-def docker_cleanup(context, print_output=True):
+def docker_cleanup(context):
     """Stop, kill and remove running docker container
     ID is read from context var cid_file"""
 
@@ -32,8 +32,8 @@ def docker_cleanup(context, print_output=True):
 
     try:
         # Cleanup previous container
-        run("docker stop %s" % cid, print_output=print_output)
-        run("docker kill %s" % cid, print_output=print_output)
-        run("docker rm %s" % cid, print_output=print_output)
+        run("docker stop %s" % cid)
+        run("docker kill %s" % cid)
+        run("docker rm %s" % cid)
     finally:
         os.remove(context.cid_file)
