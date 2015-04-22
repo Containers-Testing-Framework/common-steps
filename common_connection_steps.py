@@ -23,3 +23,4 @@ def port_open(context, port, negative=False):
             if negative:
                 return
             sleep(5)
+    raise Exception("Can't connect to port %s" % port)
