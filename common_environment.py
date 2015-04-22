@@ -9,12 +9,12 @@ import logging
 def run(command):
     """Run a command locally, print output and throw exception if exit code is not 0"""
     try:
-        logging.info("Running '%s'" % command)
+        logging.debug("Running '%s'" % command)
         output = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
         logging.debug("Return code: 0, output:\n%s" % output)
         return output
     except subprocess.CalledProcessError as e:
-        logging.warn("Return code: %d, output:\n%s" % (e.returncode, e.output))
+        logging.debug("Return code: %d, output:\n%s" % (e.returncode, e.output))
         raise e
 
 
