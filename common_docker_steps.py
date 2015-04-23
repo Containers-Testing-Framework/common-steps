@@ -10,7 +10,11 @@ import os
 @given(u'the project contains docker file in "{filename}"')
 def project_has_dockerfile(context, filename=''):
     if not filename:
-        filename = 'Dockerfile'
+        # Look for dockerfile passed from cli-tool
+        if 'DOCKERFILE' in context.config.userdata:
+            filename = context.config.userdata['DOCKERFILE']
+        else:
+            filename = 'Dockerfile'
 
     abs_path = os.path.abspath(filename)
     if not os.path.exists(abs_path):
