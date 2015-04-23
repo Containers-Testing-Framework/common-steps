@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
 # Some useful functions for your docker container steps
-from behave import step, given
+from behave import step, given, then
 from common_environment import run
 import os
 
@@ -76,3 +76,12 @@ def container_started(context, params=''):
     # A nice candidate for common steps
     context.job = run('docker run -d --cidfile %s %s %s' % (context.cid_file, params, context.image))
     context.cid = open(context.cid_file).read().strip()
+
+@then(u'Dockerfile_lint passes')
+def step_impl(context):
+    print(context.run('dockerfile_lint -f Dockerfile'))
+
+@then(u'Image can be build from Dockerfile')
+def step_impl(context):
+    context.image = context.config.userdata.get('IMAGE', 'ctf')
+    context.run('docker build -t {0} .'.format(context.image))
