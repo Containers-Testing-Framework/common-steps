@@ -23,6 +23,9 @@ def project_has_dockerfile(context, filename=''):
 def first_instruction_is_from(context):
     with open(context.dockerfile, "r") as f:
         first_line = f.readline()
+        # Skip blank lines and comments
+        while len(first_line.strip()) == 0 or first_line.strip()[0] == '#':
+            first_line = f.readline()
         assert first_line.split(' ')[0] == 'FROM',\
             "Expected first line to be FROM, but was '%s'" % first_line
 
