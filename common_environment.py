@@ -50,6 +50,8 @@ def before_all(context):
         if not context.result['contacted']:
             passed = False
             print ("no contacted hosts")
+
+        import ipdb; ipdb.set_trace()
         for host, values in context.result['contacted'].iteritems():
             if values['rc'] != 0:
                 print("On {0} returned {1}".format(host, values['rc']))
