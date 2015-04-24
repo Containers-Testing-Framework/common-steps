@@ -2,7 +2,6 @@
 
 # Some useful functions for your docker container steps
 from behave import step, given, then
-from common_environment import run
 import os
 
 
@@ -74,8 +73,8 @@ def check_for_unknown_instructions(context):
 def container_started(context, params=''):
     # TODO: allow tables here
     # A nice candidate for common steps
-    context.job = run('docker run -d --cidfile %s %s %s' % (context.cid_file, params, context.image))
-    context.cid = open(context.cid_file).read().strip()
+    context.job = context.run('docker run -d --cidfile %s %s %s' % (context.cid_file, params, context.image))
+    context.cid = context.open_file(context.cid_file).read().strip()
 
 @then(u'Dockerfile_lint passes')
 def step_impl(context):
