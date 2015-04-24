@@ -2,7 +2,6 @@
 
 # Some useful functions for your connection tests
 from behave import step
-from common_environment import run
 from time import sleep
 import subprocess
 
