@@ -57,7 +57,7 @@ def check_for_unknown_instructions(context):
             last_instruction = line.split(' ')[0]
             instructions.append(last_instruction)
 
-        if last_instruction == 'RUN' and line[-1] == '\\':
+        if line[-1] == '\\':
             line_continuation = True
         else:
             line_continuation = False
