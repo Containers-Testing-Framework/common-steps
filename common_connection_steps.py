@@ -10,7 +10,7 @@ import subprocess
 @step(u'port {port:d} is {negative:w} open')
 def port_open(context, port, negative=False):
     # Get container IP
-    context.ip = context.run("docker inspect %s" % context.cid).strip()
+    context.ip = context.run("docker inspect --format='{{.NetworkSettings.IPAddress}}' %s" % context.cid).strip()
 
     for attempts in xrange(0, 5):
         try:
