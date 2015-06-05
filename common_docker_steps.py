@@ -7,7 +7,7 @@ import os
 
 @given(u'the project contains Dockerfile')
 @given(u'the project contains docker file in "{filename}"')
-def project_has_dockerfile(context, filename=''):
+def project_has_dockerfile(context, filename=None):
     if not filename:
         # Look for dockerfile passed from cli-tool
         if 'DOCKERFILE' in context.config.userdata:
@@ -89,5 +89,12 @@ def dockefile_lint(context):
 
 @then(u'Image can be build from Dockerfile')
 def build_image_from_dockerfile(context):
+    # Due to behave bug (to-be-filed) we can't reuse 'the project contains Dockerfile' step
+    # also we don't seem to handle non-standart file paths here
+    abs_path = os.path.abspath('Dockerfile')
+    if not os.path.exists(abs_path):
+        context.scenario.skip(reason='File %s not found' % abs_path)
+        return
+
     context.image = context.config.userdata.get('IMAGE', 'ctf')
     context.run('docker build -t {0} .'.format(context.image))
