@@ -76,11 +76,18 @@ def container_started(context, params=''):
     context.job = context.run('docker run -d --cidfile %s %s %s' % (context.cid_file, params, context.image))
     context.cid = context.open_file(context.cid_file).read().strip()
 
+
 @then(u'Dockerfile_lint passes')
-def step_impl(context):
+def dockefile_lint(context):
+    try:
+        context.run('which dockerfile_lint')
+    except AssertionError:
+        context.scenario.skip(reason='Dockerfile_lint not found')
+        return
     print(context.run('dockerfile_lint -f Dockerfile'))
 
+
 @then(u'Image can be build from Dockerfile')
-def step_impl(context):
+def build_image_from_dockerfile(context):
     context.image = context.config.userdata.get('IMAGE', 'ctf')
     context.run('docker build -t {0} .'.format(context.image))
