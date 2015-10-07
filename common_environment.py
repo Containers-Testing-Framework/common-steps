@@ -159,6 +159,9 @@ def docker_setup(context):
                     context.run("docker rm -v %s" % cid)
             except AssertionError:
                 pass
+            finally:
+                if rm:
+                    context.run("docker rm -f %s" % cid)
 
             if hasattr(context, 'cid'):
                 del context.cid
