@@ -153,12 +153,9 @@ def docker_setup(context):
                 context.run("docker logs %s" % cid)
             try:
                 context.run("docker stop %s" % cid)
+            except AssertionError:
                 if kill:
                     context.run("docker kill %s" % cid)
-                if rm:
-                    context.run("docker rm -v %s" % cid)
-            except AssertionError:
-                pass
             finally:
                 if rm:
                     context.run("docker rm -f %s" % cid)
