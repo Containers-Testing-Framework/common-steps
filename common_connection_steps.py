@@ -9,7 +9,17 @@ from time import sleep
 @step(u'port {port:d} is {negative:w} open')
 def port_open(context, port, negative=False):
     # Get container IP
-    context.ip = context.run("docker inspect --format='{{.NetworkSettings.IPAddress}}' %s" % context.cid).strip()
+    for attempts in xrange(0, 5):
+        try:
+            context.ip = context.run("docker inspect --format='{{.NetworkSettings.IPAddress}}' %s" % context.cid).strip()
+            if context.ip:
+                break
+        except:
+            pass
+        sleep(1)
+
+    if not context.ip:
+        raise Exception("No IP got assigned to container")
 
     for attempts in xrange(0, 5):
         try:
