@@ -7,6 +7,7 @@ import re
 import os
 import glob
 import stat
+from sys import exit
 
 
 def sample_before_all(context):
@@ -33,10 +34,12 @@ def docker_setup(context):
     try:
         ansible_cfg = context.config.userdata['ANSIBLE']
         inventory = ansible.inventory.Inventory(ansible_cfg)
+        print("Inventory created")
     except KeyError:
         raise Exception("-D ANSIBLE missing")
     except Exception as e:
         print(e)
+        exit(1)
 
     def open_file(path):
         context.temp_dir = tempfile.mkdtemp()
