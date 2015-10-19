@@ -31,15 +31,15 @@ def docker_setup(context):
     context.remote_dir = '/tmp/'
 
     # Read ansible inventory from config
+    ansible_cfg = None
+    inventory = None
+
     try:
         ansible_cfg = context.config.userdata['ANSIBLE']
-        inventory = ansible.inventory.Inventory(ansible_cfg)
-        print("Inventory created")
     except KeyError:
         raise Exception("-D ANSIBLE missing")
-    except Exception as e:
-        print(e)
-        exit(1)
+
+    inventory = ansible.inventory.Inventory(ansible_cfg)
 
     def open_file(path):
         context.temp_dir = tempfile.mkdtemp()
