@@ -35,6 +35,8 @@ def docker_setup(context):
         inventory = ansible.inventory.Inventory(ansible_cfg)
     except KeyError:
         raise Exception("-D ANSIBLE missing")
+    except Exception as e:
+        print(e)
 
     def open_file(path):
         context.temp_dir = tempfile.mkdtemp()
