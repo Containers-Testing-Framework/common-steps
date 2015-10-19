@@ -34,12 +34,14 @@ def docker_setup(context):
     ansible_cfg = None
     inventory = None
 
+    logging.info("Reading ansible config")
     try:
         ansible_cfg = context.config.userdata['ANSIBLE']
     except KeyError:
         raise Exception("-D ANSIBLE missing")
 
     inventory = ansible.inventory.Inventory(ansible_cfg)
+    logging.info("Ansible inventory is set")
 
     def open_file(path):
         context.temp_dir = tempfile.mkdtemp()
@@ -169,3 +171,5 @@ def docker_setup(context):
                 del context.cid
             context.run('rm {0}'.format(context.cid_file))
     context.remove_container = remove_container
+
+    logging.info("Docker setup finished")
