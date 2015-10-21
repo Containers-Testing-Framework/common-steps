@@ -172,4 +172,4 @@ def docker_setup(context):
             context.run('rm {0}'.format(context.cid_file))
     context.remove_container = remove_container
 
-    sys.stdout.write("Docker setup finished\n")
+    logging.info("Docker setup finished\n")
