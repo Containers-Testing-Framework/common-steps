@@ -83,6 +83,11 @@ def container_started(context, params=''):
                 "docker inspect --format='{{.State.Running}}' %s" % context.cid).strip()
             if state == 'true':
                 return
+
+            exit_code = context.run(
+                "docker inspect --format='{{.State.ExitCode}}' %s" % context.cid).strip()
+            if exit_code != '':
+                break
         except:
             pass
         sleep(1)
