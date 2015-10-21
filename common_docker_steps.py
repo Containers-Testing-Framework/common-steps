@@ -3,6 +3,7 @@
 # Some useful functions for your docker container steps
 from behave import step, given, then
 import os
+from time import sleep
 
 
 @given(u'the project contains Dockerfile')
@@ -72,9 +73,20 @@ def check_for_unknown_instructions(context):
 @step(u'Docker container is started with params "{params}"')
 def container_started(context, params=''):
     # TODO: allow tables here
-    # A nice candidate for common steps
-    context.job = context.run('docker run -d --cidfile %s %s %s' % (context.cid_file, params, context.image))
+    context.job = context.run('docker run -d --cidfile %s %s %s' % (
+        context.cid_file, params, context.image))
     context.cid = context.open_file(context.cid_file).read().strip()
+
+    for attempts in xrange(0, 30):
+        try:
+            state = context.run(
+                "docker inspect --format='{{.State.Running}}' %s" % context.cid).strip()
+            if state == 'true':
+                return
+        except:
+            pass
+        sleep(1)
+    raise Exception("Container failed to start")
 
 
 @then(u'Dockerfile_lint passes')
