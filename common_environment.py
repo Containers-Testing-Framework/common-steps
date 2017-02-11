@@ -7,7 +7,6 @@ import re
 import os
 import glob
 import stat
-from sys import exit
 
 
 def sample_before_all(context):
