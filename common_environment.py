@@ -1,12 +1,13 @@
 # Some useful functions for your environment.py
 import tempfile
 import shutil
-import ansible.runner
 import logging
 import re
 import os
 import glob
 import stat
+
+from ansible_runner import Runner
 
 
 def sample_before_all(context):
@@ -31,7 +32,6 @@ def docker_setup(context):
 
     # Read ansible inventory from config
     ansible_cfg = None
-    inventory = None
 
     logging.info("Reading ansible config")
     try:
@@ -39,14 +39,11 @@ def docker_setup(context):
     except KeyError:
         raise Exception("-D ANSIBLE missing")
 
-    inventory = ansible.inventory.Inventory(ansible_cfg)
-    logging.info("Ansible inventory is set\n")
-
     def open_file(path):
         context.temp_dir = tempfile.mkdtemp()
-        ret = ansible.runner.Runner(
+        ret = Runner(
             module_name='fetch',
-            inventory=inventory,
+            inventory_file=ansible_cfg,
             module_args='src={0} dest={1}'.format(
                 path, context.temp_dir)).run()
         for _, value in ret['contacted'].iteritems():
@@ -61,19 +58,21 @@ def docker_setup(context):
     def run(command):
         if '{{' in command:
             command = command.replace("{{", "{{ '{{").replace("}}", "}}' }}")
+        if '=' in command:
+            command = command.replace('=', '\=')
         logging.info("Running '%s'", command)
-        context.result = ansible.runner.Runner(
+        context.result = Runner(
             module_name="shell",
-            inventory=inventory,
+            inventory_file=ansible_cfg,
             module_args="{0} chdir={1}".format(command, context.remote_dir)
         ).run()
+
         # dark means not responding
-        if context.result['dark']:
+        if 'dark' in context.result:
             print(context.result)
-        if not context.result['contacted']:
-            print("no contacted hosts")
         for host, values in context.result['contacted'].iteritems():
-            logging.info("On {0} returned {1}".format(host, values['rc']))
+            retvalue = values.get('rc')
+            logging.info("On {0} returned {1}".format(host, retvalue))
 
             if 'cmd' in values:
                 logging.info("cmd: {0}".format(values['cmd']))
@@ -88,7 +87,7 @@ def docker_setup(context):
                 logging.info('stdout:%s', values['stdout'])
                 result = values['stdout']
 
-            if values['rc'] != 0:
+            if 'failed' in values:
                 assert False
             return result
     context.run = run
@@ -99,15 +98,15 @@ def docker_setup(context):
             dockerfile = context.config.userdata['DOCKERFILE']
             dockerfile_dir = os.path.dirname(dockerfile)
             # create remote directory
-            ansible.runner.Runner(
+            Runner(
+                inventory_file=ansible_cfg,
                 module_name='file',
-                inventory=inventory,
                 module_args='dest={0} state=directory'.format(context.remote_dir)
                 ).run()
             # copy dockerfile
-            ansible.runner.Runner(
+            Runner(
+                inventory_file=ansible_cfg,
                 module_name='copy',
-                inventory=inventory,
                 module_args='src={0} dest={1}'.format(dockerfile, context.remote_dir)
                 ).run()
             # copy files from dockerfile
@@ -115,9 +114,9 @@ def docker_setup(context):
             for path in re.findall('(?:ADD|COPY) ([^ ]+) ', f_in.read()):
                 for glob_path in glob.glob(os.path.join(dockerfile_dir, path)):
                     # TODO Is there a nicer way to keep permissions?
-                    ansible.runner.Runner(
+                    Runner(
+                        inventory_file=ansible_cfg,
                         module_name='copy',
-                        inventory=inventory,
                         module_args='src={0} dest={1} directory_mode mode={2}'.format(
                             glob_path, context.remote_dir,
                             oct(stat.S_IMODE(os.stat(glob_path).st_mode)))
